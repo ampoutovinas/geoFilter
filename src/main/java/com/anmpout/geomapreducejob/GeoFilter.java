@@ -34,16 +34,20 @@ public class GeoFilter extends Configured implements Tool {
                  Job job = Job.getInstance(getConf(), "GeoFilter");
          job.setJarByClass(this.getClass());
                 
-        FileInputFormat.addInputPath(job,new Path("/user/thesis/samples/2_hours"));
+        FileInputFormat.addInputPath(job,new Path("/user/thesis/samples/12_hours"));
         FileOutputFormat.setOutputPath(job,new Path("/user/thesis/sample1/output/"
                 +Long.toString(Calendar.getInstance().getTimeInMillis())));
    // FileInputFormat.addInputPath(job, new Path(args[0]));
    // FileOutputFormat.setOutputPath(job, new Path(args[1]));
         job.setMapperClass(GeoFilterMapper.class);
 job.setMapOutputKeyClass(Text.class);
-job.setMapOutputValueClass(IntWritable.class);
+job.setMapOutputValueClass(Text.class);
 job.setInputFormatClass(GeoInputFormat.class);
+job.setReducerClass(GeoFilterReducer.class);
+job.setOutputKeyClass(Text.class);
+job.setOutputValueClass(Text.class);
 job.setOutputFormatClass(TextOutputFormat.class);
+
     return job.waitForCompletion(true) ? 0 : 1;
         
 

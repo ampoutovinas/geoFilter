@@ -65,10 +65,6 @@ value = new GeoValue();
 Text line = reader.getCurrentValue();
 LOG.debug(line.toString());
 String[] tokens = line.toString().split("\t");
-
-
-
-
  PointImpl tmp = new PointImpl(Double.
 parseDouble(tokens[1]),Double.
 parseDouble(tokens[2]), SpatialContext.GEO);
@@ -76,16 +72,14 @@ parseDouble(tokens[2]), SpatialContext.GEO);
  SpatialRelation relation = path.getPolyline().relate(tmp);
  if(relation.equals(SpatialRelation.CONTAINS)){
  key.setLocation(new Text(path.getPathId()));
- value.setActor(new Text(path.getPathId()));
- }else{
- key.setLocation(new Text("kaiadas"));
- value.setActor(new Text("kaiadas"));
- }
- }
+ key.setLatitude(new FloatWritable((float) path.getPolyline().getPoints().get(0).getX()));
+ key.setLongitude(new FloatWritable((float) path.getPolyline().getPoints().get(0).getY()));
+ value.setActor(new Text(tokens[0]));
 
 
 
-value.setEventDate(new Text(tokens[1]));
+
+value.setEventDate(new Text(tokens[3]));
 value.setEventType(new Text(tokens[2]));
 try {
 value.setFatalities(new IntWritable(Integer.
@@ -95,6 +89,8 @@ value.setFatalities(new IntWritable(0));
 }
 value.setSource(new Text(tokens[2]));
 }
+ }
+ }
 else {
 key = null;
 value = null;
