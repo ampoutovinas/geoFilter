@@ -15,17 +15,15 @@ import org.apache.hadoop.mapreduce.Mapper;
  * @author cloudera
  */
   public class GeoFilterMapper extends Mapper<GeoKey,
-GeoValue, Text, Text> {
+GeoValue, Text, GeoValue> {
 @Override
 protected void map(GeoKey key, GeoValue value, Mapper.Context
 context) throws IOException, InterruptedException {
     if(key.getLocation() != null){
 String location = key.getLocation().toString();
-//if (location.toLowerCase().equals("12")||location.toLowerCase().equals("1")
-//        ||location.toLowerCase().equals("8")  ||location.toLowerCase().equals("7") ||
-//        location.toLowerCase().equals("189")||location.toLowerCase().equals("165")  ) {
-context.write(key.getLocation(),new Text("mapper"));
-//}
+
+context.write(key.getLocation(),value);
+
 }
 }
 }

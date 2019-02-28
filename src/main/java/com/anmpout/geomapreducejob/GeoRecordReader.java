@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -72,22 +73,20 @@ parseDouble(tokens[2]), SpatialContext.GEO);
  SpatialRelation relation = path.getPolyline().relate(tmp);
  if(relation.equals(SpatialRelation.CONTAINS)){
  key.setLocation(new Text(path.getPathId()));
- key.setLatitude(new FloatWritable((float) path.getPolyline().getPoints().get(0).getX()));
- key.setLongitude(new FloatWritable((float) path.getPolyline().getPoints().get(0).getY()));
- value.setActor(new Text(tokens[0]));
+ key.setLatitude(new DoubleWritable(path.getPolyline().getPoints().get(0).getX()));
+ key.setLongitude(new DoubleWritable(path.getPolyline().getPoints().get(0).getY()));
+ value.setTimestamp(new Text(tokens[0]));
+value.setLatitude(new DoubleWritable(Double.
+parseDouble(tokens[2])));
+value.setLongitude(new DoubleWritable(Double.
+parseDouble(tokens[1])));
 
-
-
-
-value.setEventDate(new Text(tokens[3]));
-value.setEventType(new Text(tokens[2]));
-try {
-value.setFatalities(new IntWritable(Integer.
-parseInt(tokens[3])));
-} catch(NumberFormatException ex) {
-value.setFatalities(new IntWritable(0));
-}
-value.setSource(new Text(tokens[2]));
+value.setAltitude(new DoubleWritable(Double.
+parseDouble(tokens[3])));
+value.setSpeed(new DoubleWritable(Double.
+parseDouble(tokens[4])));
+value.setOrientation(new DoubleWritable(Double.
+parseDouble(tokens[5])));
 }
  }
  }

@@ -17,16 +17,16 @@ import org.apache.hadoop.io.*;
 public class GeoKey implements WritableComparable{
 
 private Text location;
-private FloatWritable latitude;
-private FloatWritable longitude;
+private DoubleWritable latitude;
+private DoubleWritable longitude;
 public GeoKey() {
 location = null;
 latitude = null;
 longitude = null;
 }
 
-public GeoKey(Text location, FloatWritable latitude,
-FloatWritable longitude) {
+public GeoKey(Text location, DoubleWritable latitude,
+DoubleWritable longitude) {
 this.location = location;
 this.latitude = latitude;
 this.longitude = longitude;
@@ -46,10 +46,10 @@ if (location == null) {
 location = new Text();
 }
 if (latitude == null) {
-latitude = new FloatWritable();
+latitude = new DoubleWritable();
 }
 if (longitude == null) {
-longitude = new FloatWritable();
+longitude = new DoubleWritable();
 }
 location.readFields(di);
 latitude.readFields(di);
@@ -81,19 +81,19 @@ return longitude.compareTo(other.longitude);
         this.location = location;
     }
 
-    public FloatWritable getLatitude() {
+    public DoubleWritable getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(FloatWritable latitude) {
+    public void setLatitude(DoubleWritable latitude) {
         this.latitude = latitude;
     }
 
-    public FloatWritable getLongitude() {
+    public DoubleWritable getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(FloatWritable longitude) {
+    public void setLongitude(DoubleWritable longitude) {
         this.longitude = longitude;
     }
 

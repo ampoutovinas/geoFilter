@@ -15,15 +15,19 @@ import org.apache.hadoop.mapreduce.Reducer;
  * @author cloudera
  */
 public class GeoFilterReducer extends Reducer<Text,
-Text, Text, Text> {
+GeoValue, Text, Text> {
 
     @Override
-    protected void reduce(Text key, java.lang.Iterable<Text> values, Context context) throws IOException, InterruptedException {
-       int sum = 0;
-       for (Text count : values) {
-        sum += 1;
+    protected void reduce(Text key, java.lang.Iterable<GeoValue> values, Context context) throws IOException, InterruptedException {
+       double speed = 0;
+        int count = 0;
+       for (GeoValue value : values) {
+        speed = value.getSpeed().get() + speed;
+        count = count+1;
       }
-      context.write(key, new Text(String.valueOf(sum)));
+       speed= speed/count;
+     context.write(key, new Text(String.valueOf(count)+"\n"));
+      context.write(key, new Text(String.valueOf(speed)+"\n"));
         
     }
     

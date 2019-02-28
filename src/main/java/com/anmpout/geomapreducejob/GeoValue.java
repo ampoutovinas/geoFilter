@@ -15,95 +15,121 @@ import org.apache.hadoop.io.*;
  * @author cloudera
  */
 public class GeoValue implements WritableComparable {
-private Text eventDate;
-private Text eventType;
-private Text actor;
-private Text source;
-private IntWritable fatalities; 
+private Text timestamp;
+private DoubleWritable latitude;
+private DoubleWritable longitude;
+private DoubleWritable altitude;
+private DoubleWritable speed;
+private DoubleWritable orientation;
 
     public GeoValue() {
-        this.eventDate = null;
-        this.eventType = null;
-        this.actor = null;
-        this.source = null;
-        this.fatalities = null;
+         this.timestamp = null;
+        this.latitude = null;
+        this.longitude = null;
+        this.altitude = null;
+        this.speed = null;
+        this.orientation = null;
     }
 
-    public GeoValue(Text eventDate, Text eventType, Text actor, Text source, IntWritable fatalities) {
-        this.eventDate = eventDate;
-        this.eventType = eventType;
-        this.actor = actor;
-        this.source = source;
-        this.fatalities = fatalities;
+    public GeoValue(Text timestamp, DoubleWritable latitude, DoubleWritable longitude,
+            DoubleWritable altitude, DoubleWritable speed,DoubleWritable orientation) {
+        this.timestamp = timestamp;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.altitude = altitude;
+        this.speed = speed;
+        this.orientation = orientation;
     }
 
-    public Text getEventDate() {
-        return eventDate;
+    public Text getTimestamp() {
+        return timestamp;
     }
 
-    public void setEventDate(Text eventDate) {
-        this.eventDate = eventDate;
+    public void setTimestamp(Text timestamp) {
+        this.timestamp = timestamp;
     }
 
-    public Text getEventType() {
-        return eventType;
+    public DoubleWritable getLatitude() {
+        return latitude;
     }
 
-    public void setEventType(Text eventType) {
-        this.eventType = eventType;
+    public void setLatitude(DoubleWritable latitude) {
+        this.latitude = latitude;
     }
 
-    public Text getActor() {
-        return actor;
+    public DoubleWritable getLongitude() {
+        return longitude;
     }
 
-    public void setActor(Text actor) {
-        this.actor = actor;
+    public void setLongitude(DoubleWritable longitude) {
+        this.longitude = longitude;
     }
 
-    public Text getSource() {
-        return source;
+    public DoubleWritable getAltitude() {
+        return altitude;
     }
 
-    public void setSource(Text source) {
-        this.source = source;
+    public void setAltitude(DoubleWritable altitude) {
+        this.altitude = altitude;
     }
 
-    public IntWritable getFatalities() {
-        return fatalities;
+    public DoubleWritable getSpeed() {
+        return speed;
     }
 
-    public void setFatalities(IntWritable fatalities) {
-        this.fatalities = fatalities;
+    public void setSpeed(DoubleWritable speed) {
+        this.speed = speed;
     }
+
+    public DoubleWritable getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(DoubleWritable orientation) {
+        this.orientation = orientation;
+    }
+
 
     @Override
     public void write(DataOutput d) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+       timestamp.write(d);
+       longitude.write(d);
+       latitude.write(d);
+       altitude.write(d);
+       speed.write(d);
+       orientation.write(d);
+       
+      
+      
+
     }
 
     @Override
     public void readFields(DataInput di) throws IOException {
-if (eventDate == null) {
-eventDate = new Text();
+if (timestamp == null) {
+timestamp = new Text();
 }
-if (eventType == null) {
-eventType = new Text();
+if (latitude == null) {
+latitude = new DoubleWritable();
 }
-if (actor == null) {
-actor = new Text();
+if (longitude == null) {
+longitude = new DoubleWritable();
 }
-if (source == null) {
-source = new Text();
+if (altitude == null) {
+altitude = new DoubleWritable();
 }
-if (fatalities == null) {
-fatalities = new IntWritable();
+if (speed == null) {
+speed = new DoubleWritable();
 }
-eventDate.readFields(di);
-eventType.readFields(di);
-actor.readFields(di);
-source.readFields(di);
-fatalities.readFields(di);
+if (orientation == null) {
+orientation = new DoubleWritable();
+}
+timestamp.readFields(di);
+latitude.readFields(di);
+longitude.readFields(di);
+altitude.readFields(di);
+speed.readFields(di);
+orientation.readFields(di);
     
     
     }
@@ -111,23 +137,28 @@ fatalities.readFields(di);
     @Override
     public int compareTo(Object o) {
 GeoValue other = (GeoValue)o;
-int cmp = eventDate.compareTo(other.eventDate);
+int cmp = timestamp.compareTo(other.timestamp);
 if (cmp != 0) {
 return cmp;
 }
-cmp = eventType.compareTo(other.eventType);
+cmp = latitude.compareTo(other.latitude);
 if (cmp != 0) {
 return cmp;
 }
-cmp = actor.compareTo(other.actor);
+cmp = longitude.compareTo(other.longitude);
 if (cmp != 0) {
 return cmp;
 }
-cmp = source.compareTo(other.source);
+cmp = altitude.compareTo(other.altitude);
 if (cmp != 0) {
 return cmp;
 }
-return fatalities.compareTo(other.fatalities);
+cmp = speed.compareTo(other.speed);
+if (cmp != 0) {
+return cmp;
+}
+
+return orientation.compareTo(other.orientation);
     }
 
 
