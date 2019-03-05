@@ -15,14 +15,14 @@ import org.apache.hadoop.mapreduce.Mapper;
  * @author cloudera
  */
   public class GeoFilterMapper extends Mapper<GeoKey,
-GeoValue, Text, GeoValue> {
+GeoValue, GeoKey, GeoValue> {
 @Override
 protected void map(GeoKey key, GeoValue value, Mapper.Context
 context) throws IOException, InterruptedException {
     if(key.getLocation() != null){
 String location = key.getLocation().toString();
 
-context.write(key.getLocation(),value);
+context.write(key,value);
 
 }
 }

@@ -39,8 +39,8 @@ public class GeoFilter extends Configured implements Tool {
                 +Long.toString(Calendar.getInstance().getTimeInMillis())));
    // FileInputFormat.addInputPath(job, new Path(args[0]));
    // FileOutputFormat.setOutputPath(job, new Path(args[1]));
-        job.setMapperClass(GeoFilterMapper.class);
-job.setMapOutputKeyClass(Text.class);
+job.setMapperClass(GeoFilterMapper.class);
+job.setMapOutputKeyClass(GeoKey.class);
 job.setMapOutputValueClass(GeoValue.class);
 job.setInputFormatClass(GeoInputFormat.class);
 job.setReducerClass(GeoFilterReducer.class);

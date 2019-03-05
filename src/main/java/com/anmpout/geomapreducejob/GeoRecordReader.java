@@ -6,6 +6,7 @@
 package com.anmpout.geomapreducejob;
 
 import com.spatial4j.core.context.SpatialContext;
+import com.spatial4j.core.distance.DistanceUtils;
 import com.spatial4j.core.shape.*;
 import com.spatial4j.core.shape.impl.*;
 import java.io.IOException;
@@ -75,6 +76,7 @@ parseDouble(tokens[2]), SpatialContext.GEO);
  key.setLocation(new Text(path.getPathId()));
  key.setLatitude(new DoubleWritable(path.getPolyline().getPoints().get(0).getX()));
  key.setLongitude(new DoubleWritable(path.getPolyline().getPoints().get(0).getY()));
+ key.setDistance(new DoubleWritable(path.getDistance()));
  value.setTimestamp(new Text(tokens[0]));
 value.setLatitude(new DoubleWritable(Double.
 parseDouble(tokens[2])));
@@ -123,6 +125,6 @@ return gotNextKeyValue;
     data = new String(Files.readAllBytes(Paths.get(fileName))); 
     return data; 
   } 
-    
+
     
 }

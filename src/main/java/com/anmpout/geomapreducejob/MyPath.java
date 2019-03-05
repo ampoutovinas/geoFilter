@@ -6,6 +6,7 @@
 package com.anmpout.geomapreducejob;
 
 import com.spatial4j.core.context.SpatialContext;
+import com.spatial4j.core.distance.DistanceUtils;
 import com.spatial4j.core.shape.Point;
 import com.spatial4j.core.shape.impl.BufferedLineString;
 import com.spatial4j.core.shape.impl.PointImpl;
@@ -28,7 +29,8 @@ public class MyPath {
     private String pathOrignDeviceId;
     private String pathDestinationDeviceId;
     private BufferedLineString polyline;
-
+   private Double distance;
+ 
 
     public MyPath() {
     }
@@ -60,7 +62,7 @@ public class MyPath {
             
             if(jSONObject.has("polyline")){
             returnPath.setPolyline(createPolyline(jSONObject.optString("polyline")));
-            
+               returnPath.setDistance(calculateDistance(returnPath.getPolyline()));
             }
 
         } catch (JSONException ex) {
@@ -155,11 +157,27 @@ public class MyPath {
         this.polyline = polyline;
     }
 
+    public Double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(Double distance) {
+        this.distance = distance;
+    }
+    
+
     @Override
     public String toString() {
         return "MyPath{" + "pathId=" + pathId + ", pathName=" + pathName + ", pathOrignDeviceId=" + pathOrignDeviceId + ", pathDestinationDeviceId=" + pathDestinationDeviceId + ", polyline=" + polyline + '}';
     }
     
     
-
+        private static Double calculateDistance(BufferedLineString polyline) {
+           double returnDistance=0;
+       
+          for(int i =0;i<polyline.getPoints().size()-1;i++){
+        returnDistance = returnDistance +  DistanceUtils.degrees2Dist(SpatialContext.GEO.getDistCalc().distance(polyline.getPoints().get(i), polyline.getPoints().get(i+1)), DistanceUtils.EARTH_MEAN_RADIUS_KM) * 1000;
+          }       
+    return returnDistance;
+    }
 }
