@@ -5,12 +5,13 @@
  */
 package com.anmpout.geomapreducejob;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Calendar;
-import java.util.UUID;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.Job;
@@ -31,12 +32,17 @@ public class GeoFilter extends Configured implements Tool {
 
     @Override
     public int run(String[] args) throws Exception {
+        String outputPath = "/user/thesis/sample1/output/"
+                +Long.toString(Calendar.getInstance().getTimeInMillis());
+
                  Job job = Job.getInstance(getConf(), "GeoFilter");
          job.setJarByClass(this.getClass());
-                
+         try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+              new FileOutputStream("/home/cloudera/Downloads/mapperoutput.txt"), "utf-8"))) {
+   writer.write(outputPath);
+}       
         FileInputFormat.addInputPath(job,new Path("/user/thesis/samples/2_hours"));
-        FileOutputFormat.setOutputPath(job,new Path("/user/thesis/sample1/output/"
-                +Long.toString(Calendar.getInstance().getTimeInMillis())));
+        FileOutputFormat.setOutputPath(job,new Path(outputPath));
    // FileInputFormat.addInputPath(job, new Path(args[0]));
    // FileOutputFormat.setOutputPath(job, new Path(args[1]));
 job.setMapperClass(GeoFilterMapper.class);
@@ -47,12 +53,8 @@ job.setReducerClass(GeoFilterReducer.class);
 job.setOutputKeyClass(Text.class);
 job.setOutputValueClass(Text.class);
 job.setOutputFormatClass(TextOutputFormat.class);
-
-    return job.waitForCompletion(true) ? 0 : 1;
         
-
-
-
+    return job.waitForCompletion(true) ? 0 : 1;
 
     }
   public static void main(String[] args) throws Exception {
@@ -60,6 +62,8 @@ int exitCode = ToolRunner.run(new GeoFilter(), args);
 System.exit(exitCode);
   
   } 
+  
+    
     
 }
   

@@ -39,12 +39,12 @@ GeoValue, Text, Text> {
       double seconds = time % 60;
 
 //timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-       
 
-     context.write(key.getLocation(), new Text(String.valueOf(count)+"\n"));
-      context.write(key.getLocation(), new Text(String.valueOf(speed)+"\n"));
-       context.write(key.getLocation(), new Text(String.valueOf(time)+"\n")); 
-       context.write(key.getLocation(), new Text(String.valueOf(key.getDistance().get())+"\n\n"));  
+     context.write(key.getLocation(), new Text(String.valueOf(count)+"\t"+
+             String.valueOf(speed)+"\t"+String.valueOf(time)+"\t"+String.valueOf(key.getDistance().get())));
+//      context.write(key.getLocation(), new Text());
+//       context.write(key.getLocation(), new Text()); 
+//       context.write(key.getLocation(), new Text()+"\n\n"));  
     }
     
     
