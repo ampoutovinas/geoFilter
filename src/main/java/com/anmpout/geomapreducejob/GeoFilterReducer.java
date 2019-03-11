@@ -14,15 +14,17 @@ import org.apache.hadoop.mapreduce.Reducer;
  *
  * @author cloudera
  */
-public class GeoFilterReducer extends Reducer<GeoKey,
+public class GeoFilterReducer extends Reducer<GeoKeyMap,
 GeoValue, Text, Text> {
 
     @Override
-    protected void reduce(GeoKey key, java.lang.Iterable<GeoValue> values, Context context) throws IOException, InterruptedException {
+    protected void reduce(GeoKeyMap keyMap, java.lang.Iterable<GeoValue> values, Context context) throws IOException, InterruptedException {
        double speed = 0;
         int count = 0;
         int time = 0;
         String timeString ="";
+        
+      
        for (GeoValue value : values) {
            if(value.getSpeed().get()>0){
         speed = value.getSpeed().get() + speed;
@@ -31,7 +33,7 @@ GeoValue, Text, Text> {
       }
        speed= speed/count;
        if(speed != 0){
-       time = (int) (key.getDistance().get()/speed);
+       time = (int) (keyMap.getKey().getDistance().get()/speed);
        }
       double hours = time / 3600;
       double minutes = (time % 3600) / 60;
@@ -39,8 +41,8 @@ GeoValue, Text, Text> {
 
 //timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
 
-     context.write(key.getLocation(), new Text(String.valueOf(count)+"\t"+
-             String.valueOf(speed)+"\t"+String.valueOf(time)+"\t"+String.valueOf(key.getDistance().get())));
+     context.write(keyMap.getKey().getLocation(),new Text(String.valueOf(keyMap.getTimeslot())+"\t"+String.valueOf(count)+"\t"+
+             String.valueOf(speed)+"\t"+String.valueOf(time)+"\t"+String.valueOf(keyMap.getKey().getDistance().get())));
 //      context.write(key.getLocation(), new Text());
 //       context.write(key.getLocation(), new Text()); 
 //       context.write(key.getLocation(), new Text()+"\n\n"));  

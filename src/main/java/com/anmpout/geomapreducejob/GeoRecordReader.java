@@ -11,9 +11,15 @@ import com.spatial4j.core.shape.impl.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.lib.input.LineRecordReader;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -75,6 +81,19 @@ parseDouble(tokens[2]), SpatialContext.GEO);
  key.setLongitude(new DoubleWritable(path.getPolyline().getPoints().get(0).getY()));
  key.setDistance(new DoubleWritable(path.getDistance()));
  value.setTimestamp(new Text(tokens[0]));
+     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    Date date;
+      long unixTime = 0;
+            
+     try {
+         date = dateFormat.parse(tokens[0]);
+          unixTime  = (long) date.getTime()/1000;
+
+     } catch (ParseException ex) {
+         
+         java.util.logging.Logger.getLogger(GeoRecordReader.class.getName()).log(Level.SEVERE, null, ex);
+     }
+value.setUnixTimestamp(new LongWritable(unixTime));
 value.setLatitude(new DoubleWritable(Double.
 parseDouble(tokens[2])));
 value.setLongitude(new DoubleWritable(Double.

@@ -21,6 +21,7 @@ private DoubleWritable longitude;
 private DoubleWritable altitude;
 private DoubleWritable speed;
 private DoubleWritable orientation;
+private LongWritable unixTimestamp;
 
     public GeoValue() {
          this.timestamp = null;
@@ -29,16 +30,18 @@ private DoubleWritable orientation;
         this.altitude = null;
         this.speed = null;
         this.orientation = null;
+        this.unixTimestamp = null;
     }
 
     public GeoValue(Text timestamp, DoubleWritable latitude, DoubleWritable longitude,
-            DoubleWritable altitude, DoubleWritable speed,DoubleWritable orientation) {
+            DoubleWritable altitude, DoubleWritable speed,DoubleWritable orientation,LongWritable unixTimestamp) {
         this.timestamp = timestamp;
         this.latitude = latitude;
         this.longitude = longitude;
         this.altitude = altitude;
         this.speed = speed;
         this.orientation = orientation;
+        this.unixTimestamp = unixTimestamp;
     }
 
     public Text getTimestamp() {
@@ -89,6 +92,16 @@ private DoubleWritable orientation;
         this.orientation = orientation;
     }
 
+    public LongWritable getUnixTimestamp() {
+        return unixTimestamp;
+    }
+
+    public void setUnixTimestamp(LongWritable unixTimestamp) {
+        this.unixTimestamp = unixTimestamp;
+    }
+    
+    
+
 
     @Override
     public void write(DataOutput d) throws IOException {
@@ -98,6 +111,7 @@ private DoubleWritable orientation;
        altitude.write(d);
        speed.write(d);
        orientation.write(d);
+       unixTimestamp.write(d);
        
       
       
@@ -124,12 +138,16 @@ speed = new DoubleWritable();
 if (orientation == null) {
 orientation = new DoubleWritable();
 }
+if (unixTimestamp == null) {
+unixTimestamp = new LongWritable();
+}
 timestamp.readFields(di);
 latitude.readFields(di);
 longitude.readFields(di);
 altitude.readFields(di);
 speed.readFields(di);
 orientation.readFields(di);
+unixTimestamp.readFields(di);
     
     
     }
@@ -157,7 +175,10 @@ cmp = speed.compareTo(other.speed);
 if (cmp != 0) {
 return cmp;
 }
-
+cmp = unixTimestamp.compareTo(other.unixTimestamp);
+if (cmp != 0) {
+return cmp;
+}
 return orientation.compareTo(other.orientation);
     }
 
