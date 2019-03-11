@@ -29,7 +29,6 @@ GeoValue, Text, Text> {
         count = count+1;
            }
       }
-            context.write(key.getLocation(), new Text(String.valueOf(speed)+"\n"));
        speed= speed/count;
        if(speed != 0){
        time = (int) (key.getDistance().get()/speed);
