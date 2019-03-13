@@ -50,7 +50,7 @@ public class GeoFilter extends Configured implements Tool {
                 new FileOutputStream("/home/cloudera/Downloads/mapperoutput.txt"), "utf-8"))) {
             writer.write(outputPath);
         }
-        FileInputFormat.addInputPath(job, new Path("/user/thesis/samples/2_hours"));
+        FileInputFormat.addInputPath(job, new Path("/user/thesis/samples/24_hours"));
         FileOutputFormat.setOutputPath(job, new Path(outputPath));
         // FileInputFormat.addInputPath(job, new Path(args[0]));
         // FileOutputFormat.setOutputPath(job, new Path(args[1]));
