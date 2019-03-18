@@ -50,7 +50,7 @@ public class GeoFilter extends Configured implements Tool {
                 new FileOutputStream("/home/cloudera/Downloads/mapperoutput.txt"), "utf-8"))) {
             writer.write(outputPath);
         }
-        FileInputFormat.addInputPath(job, new Path("/user/thesis/samples/24_hours"));
+        FileInputFormat.addInputPath(job, new Path("/user/thesis/samples/fcd_gps_02_2018"));
         FileOutputFormat.setOutputPath(job, new Path(outputPath));
         // FileInputFormat.addInputPath(job, new Path(args[0]));
         // FileOutputFormat.setOutputPath(job, new Path(args[1]));
@@ -86,8 +86,8 @@ public class GeoFilter extends Configured implements Tool {
     private static void saveItemToDB(String readLine, Connection conn) {
         try {
             // the mysql insert statement
-            String query = " insert into FILTER_DATA (PATH_ID,TIMESTAMP ,COUNT, SPEED, TIME, DISTANCE)"
-                    + " values (?, ?, ?, ?, ?,?)";
+            String query = " insert into FILTER_DATA (PATH_ID,TIMESTAMP ,COUNT, SPEED, TIME)"
+                    + " values (?, ?, ?, ?, ?)";
 
             // create the mysql insert preparedstatement
             String[] parts = readLine.split("\t");
@@ -122,12 +122,12 @@ public class GeoFilter extends Configured implements Tool {
             } else {
                 preparedStmt.setInt(5, 0);
             }
-            //DISTANCE
-            if (!parts[5].equals("") && !parts[5].equals("NaN")) {
-                preparedStmt.setDouble(6, Double.parseDouble(parts[5]));
-            } else {
-                preparedStmt.setDouble(6, 0.0);
-            }
+//            //DISTANCE
+//            if (!parts[5].equals("") && !parts[5].equals("NaN")) {
+//                preparedStmt.setDouble(6, Double.parseDouble(parts[5]));
+//            } else {
+//                preparedStmt.setDouble(6, 0.0);
+ //           }
 
             // execute the preparedstatement
             preparedStmt.execute();
@@ -141,14 +141,19 @@ public class GeoFilter extends Configured implements Tool {
 
     public static void openFileFromHDFS(FileSystem fs, Path path) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
         InputStream is = fs.open(path);
-        String url = "jdbc:mysql://127.0.0.1:3306/GeoSpatialDB";
-        String user = "cloudera";
-        String password = "cloudera";
-
-        // Load the Connector/J driver
-        Class.forName("com.mysql.jdbc.Driver").newInstance();
-        // Establish connection to MySQL
-        Connection conn = DriverManager.getConnection(url, user, password);
+//        String url = "jdbc:mysql://127.0.0.1:3306/GeoSpatialDB";
+//        String user = "cloudera";
+//        String password = "cloudera";
+//
+//        // Load the Connector/J driver
+Class.forName("com.mysql.jdbc.Driver").newInstance();
+//          Class.forName("com.mysql.cj.jdbc.Driver").newInstance();  
+//        // Establish connection to MySQL
+//        Connection conn = DriverManager.getConnection(url, user, password);
+ //           Class.forName("com.mysql.cj.jdbc.Driver");  
+Connection conn=DriverManager.getConnection(  
+"jdbc:mysql://geofilterdb.c4nkehdtywwc.us-east-2.rds.amazonaws.com:3306/geofilterdb","cloudera","cloudera"); 
+      
         String readLine;
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
@@ -157,6 +162,7 @@ public class GeoFilter extends Configured implements Tool {
             System.out.println(readLine);
 
         }
+        conn.close();
     }
 
 }
