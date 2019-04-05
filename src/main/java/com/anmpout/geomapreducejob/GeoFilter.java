@@ -115,12 +115,6 @@ public class GeoFilter extends Configured implements Tool {
             } else {
                 preparedStmt.setInt(11, 0);
             }
-//            //DISTANCE
-//            if (!parts[5].equals("") && !parts[5].equals("NaN")) {
-//                preparedStmt.setDouble(6, Double.parseDouble(parts[5]));
-//            } else {
-//                preparedStmt.setDouble(6, 0.0);
- //           }
 
             // execute the preparedstatement
             preparedStmt.execute();
@@ -145,8 +139,6 @@ public class GeoFilter extends Configured implements Tool {
         boolean saveStats = Boolean.parseBoolean(args[2]);
         FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(outputPath));
-        // FileInputFormat.addInputPath(job, new Path(args[0]));
-        // FileOutputFormat.setOutputPath(job, new Path(args[1]));
         job.setMapperClass(GeoFilterMapper.class);
         job.setMapOutputKeyClass(GeoKeyMap.class);
         job.setMapOutputValueClass(GeoValue.class);
@@ -252,12 +244,6 @@ public class GeoFilter extends Configured implements Tool {
             } else {
                 preparedStmt.setInt(11, 0);
             }
-//            //DISTANCE
-//            if (!parts[5].equals("") && !parts[5].equals("NaN")) {
-//                preparedStmt.setDouble(6, Double.parseDouble(parts[5]));
-//            } else {
-//                preparedStmt.setDouble(6, 0.0);
- //           }
 
             // execute the preparedstatement
             preparedStmt.execute();
@@ -277,10 +263,6 @@ public class GeoFilter extends Configured implements Tool {
 //
 //        // Load the Connector/J driver
 Class.forName("com.mysql.jdbc.Driver").newInstance();
-//          Class.forName("com.mysql.cj.jdbc.Driver").newInstance();  
-//        // Establish connection to MySQL
-//        Connection conn = DriverManager.getConnection(url, user, password);
- //           Class.forName("com.mysql.cj.jdbc.Driver");  
 Connection conn=DriverManager.getConnection(  
 "jdbc:mysql://geofilterdb.c4nkehdtywwc.us-east-2.rds.amazonaws.com:3306/geofilterdb","cloudera","cloudera"); 
       
