@@ -18,6 +18,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Calendar;
+import java.util.Date;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
@@ -41,6 +42,9 @@ public class GeoFilter extends Configured implements Tool {
 
     private static void saveItemToDBRealTime(String readLine, Connection conn) {
         try {
+            Calendar cal = Calendar.getInstance();
+            double speed = 0.0;
+            int    count = 0;
             // the mysql insert statement
             String query = " insert into FILTER_DATA_RT (PATH_ID,TIMESTAMP ,COUNT, SPEED,"
                     + " TIME, MAX_SPEED, MIN_SPEED, MEDIAN_SPEED, DAY, MONTH, YEAR)"
@@ -48,6 +52,20 @@ public class GeoFilter extends Configured implements Tool {
 
             // create the mysql insert preparedstatement
             String[] parts = readLine.split("\t");
+            if (!parts[2].equals("") && !parts[2].equals("NaN")) {
+            count = Integer.parseInt(parts[2]);
+            }
+            if (!parts[3].equals("") && !parts[3].equals("NaN")) {
+            speed = Double.parseDouble(parts[3]);
+            }
+            int dayOfWeekInMonth = cal.get(Calendar.DAY_OF_WEEK_IN_MONTH);
+            int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+            int year = cal.get(Calendar.YEAR);       
+            int month = cal.get(Calendar.MONTH);      
+            long previousYearTimestamp = getSameDayOfYearD(year-1,month,dayOfWeek,dayOfWeekInMonth).getTime()/1000;
+            long previous2YearTimestamp = getSameDayOfYearD(year-2,month,dayOfWeek,dayOfWeekInMonth).getTime()/1000;
+            System.out.println(previousYearTimestamp);
+            System.out.println(previous2YearTimestamp);
             PreparedStatement preparedStmt = conn.prepareStatement(query);
             //PATH_ID
             if (!parts[0].equals("") && !parts[0].equals("NaN")) {
@@ -115,9 +133,13 @@ public class GeoFilter extends Configured implements Tool {
             } else {
                 preparedStmt.setInt(11, 0);
             }
+            
+            
 
             // execute the preparedstatement
             preparedStmt.execute();
+            
+            
 
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -270,7 +292,6 @@ Connection conn=DriverManager.getConnection(
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         if(realTime){
                 while (((readLine = br.readLine()) != null)) {
-             // String[] parts = readLine.split("\t");
             saveItemToDBRealTime(readLine,conn);
             System.out.println(readLine);
 
@@ -278,7 +299,6 @@ Connection conn=DriverManager.getConnection(
             
         }else{
         while (((readLine = br.readLine()) != null)) {
-             // String[] parts = readLine.split("\t");
             saveItemToDB(readLine,conn);
             System.out.println(readLine);
 
@@ -286,5 +306,17 @@ Connection conn=DriverManager.getConnection(
         }
         conn.close();
     }
-
+public static Date getSameDayOfYearD(int year, int month, int day, int week) {
+    Calendar cal = Calendar.getInstance();
+    cal.set(Calendar.DAY_OF_WEEK, day);
+    cal.set(Calendar.DAY_OF_WEEK_IN_MONTH, week);
+    cal.set(Calendar.MONTH, month);
+    cal.set(Calendar.YEAR, year);
+    cal.set(Calendar.HOUR,cal.get(Calendar.HOUR)-1);
+    cal.set(Calendar.MINUTE,0);
+    cal.set(Calendar.SECOND,0);
+    cal.set(Calendar.MILLISECOND,0);
+    System.out.println(cal.getTime());
+    return cal.getTime();
+}
 }
