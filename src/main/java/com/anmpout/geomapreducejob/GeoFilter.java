@@ -16,9 +16,12 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
@@ -45,6 +48,9 @@ public class GeoFilter extends Configured implements Tool {
             Calendar cal = Calendar.getInstance();
             double speed = 0.0;
             int    count = 0;
+            int pathId = 0;
+            long currentTimestamp = 0L;
+            List<FilterData> profileDayData = new ArrayList<>();
             // the mysql insert statement
             String query = " insert into FILTER_DATA_RT (PATH_ID,TIMESTAMP ,COUNT, SPEED,"
                     + " TIME, MAX_SPEED, MIN_SPEED, MEDIAN_SPEED, DAY, MONTH, YEAR)"
@@ -58,14 +64,48 @@ public class GeoFilter extends Configured implements Tool {
             if (!parts[3].equals("") && !parts[3].equals("NaN")) {
             speed = Double.parseDouble(parts[3]);
             }
+            if (!parts[0].equals("") && !parts[0].equals("NaN")) {
+                pathId = Integer.parseInt(parts[0]);
+               
+            }
+            System.out.println(pathId);
+            if(pathId != 0){
+         
             int dayOfWeekInMonth = cal.get(Calendar.DAY_OF_WEEK_IN_MONTH);
             int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
             int year = cal.get(Calendar.YEAR);       
             int month = cal.get(Calendar.MONTH);      
             long previousYearTimestamp = getSameDayOfYearD(year-1,month,dayOfWeek,dayOfWeekInMonth).getTime()/1000;
             long previous2YearTimestamp = getSameDayOfYearD(year-2,month,dayOfWeek,dayOfWeekInMonth).getTime()/1000;
-            System.out.println(previousYearTimestamp);
-            System.out.println(previous2YearTimestamp);
+            String queryProfileSameDay = " select * from FILTER_DATA T WHERE"
+                    + " (T.TIMESTAMP = ? OR T.TIMESTAMP = ?)"
+                    + " AND T.PATH_ID = ? ORDER BY T.TIMESTAMP ";
+            PreparedStatement preparedStmtpProfileDay = conn.prepareStatement(queryProfileSameDay);
+            preparedStmtpProfileDay.setLong(1, previousYearTimestamp);
+            preparedStmtpProfileDay.setLong(2, previous2YearTimestamp);
+            preparedStmtpProfileDay.setLong(3, pathId);
+                
+            ResultSet rs = preparedStmtpProfileDay.executeQuery();
+             System.out.println(rs.first());
+            while(rs.next()){
+                FilterData filterData = new FilterData();
+                filterData.setPathId(rs.getInt(1));
+                filterData.setTimestamp(rs.getLong(2));
+                filterData.setTime(rs.getInt(3));
+                filterData.setCount(rs.getInt(4));
+                filterData.setSpeed(rs.getDouble(6));
+                filterData.setDay(rs.getInt(rs.getInt(7)));
+                filterData.setMonth(rs.getInt(8));
+                filterData.setYear(rs.getInt(9));
+                filterData.setMedianSpeed(rs.getInt(10));
+                filterData.setMaxSpeed(rs.getInt(11));
+                filterData.setMinSpeed(rs.getInt(12));
+                profileDayData.add(filterData);
+                System.out.println(filterData.toString());
+            
+            }
+            
+            }
             PreparedStatement preparedStmt = conn.prepareStatement(query);
             //PATH_ID
             if (!parts[0].equals("") && !parts[0].equals("NaN")) {
@@ -97,7 +137,7 @@ public class GeoFilter extends Configured implements Tool {
             } else {
                 preparedStmt.setInt(5, 0);
             }
-                        //MAX         
+              //MAX         
             if (!parts[6].equals("") && !parts[6].equals("NaN")) {
                 preparedStmt.setDouble(6, Double.parseDouble(parts[6]));
             } else {
@@ -115,19 +155,19 @@ public class GeoFilter extends Configured implements Tool {
             } else {
                 preparedStmt.setDouble(8, 0);
             }
-                        //day         
+            //day         
             if (!parts[9].equals("") && !parts[9].equals("NaN")) {
                 preparedStmt.setInt(9, Integer.parseInt(parts[9]));
             } else {
                 preparedStmt.setInt(9, 0);
             }
-                                    //month         
+           //month         
             if (!parts[10].equals("") && !parts[10].equals("NaN")) {
                 preparedStmt.setInt(10, Integer.parseInt(parts[10]));
             } else {
                 preparedStmt.setInt(10, 0);
             }
-                                                //year         
+             //year         
             if (!parts[11].equals("") && !parts[11].equals("NaN")) {
                 preparedStmt.setInt(11, Integer.parseInt(parts[11]));
             } else {
@@ -138,6 +178,9 @@ public class GeoFilter extends Configured implements Tool {
 
             // execute the preparedstatement
             preparedStmt.execute();
+            //create profile for current record
+            createProfileForCurrentDay(profileDayData,currentTimestamp,speed,count);
+            
             
             
 
@@ -145,6 +188,15 @@ public class GeoFilter extends Configured implements Tool {
             System.err.println(e.getMessage());
 
         }    }
+
+    private static void createProfileForCurrentDay(List<FilterData> profileDayData, long currentTimestamp, double speed, int count) {
+     
+        System.out.println("createProfileForCurrentDay");
+        System.out.println(profileDayData.size());
+        System.out.println(currentTimestamp);
+        System.out.println(speed);
+        System.out.println(count);
+    }
 
     @Override
     public int run(String[] args) throws Exception {
