@@ -68,7 +68,12 @@ public class GeoFilter extends Configured implements Tool {
                 pathId = Integer.parseInt(parts[0]);
                
             }
-            System.out.println(pathId);
+                        //TIMESTAMP
+            if (!parts[1].equals("") && !parts[1].equals("NaN")) {
+                currentTimestamp = Long.parseLong(parts[1]);
+            } else {
+  
+            }
             if(pathId != 0){
          
             int dayOfWeekInMonth = cal.get(Calendar.DAY_OF_WEEK_IN_MONTH);
@@ -86,7 +91,7 @@ public class GeoFilter extends Configured implements Tool {
             preparedStmtpProfileDay.setLong(3, pathId);
                 
             ResultSet rs = preparedStmtpProfileDay.executeQuery();
-             System.out.println(rs.first());
+
             while(rs.next()){
                 FilterData filterData = new FilterData();
                 filterData.setPathId(rs.getInt(1));
@@ -94,14 +99,14 @@ public class GeoFilter extends Configured implements Tool {
                 filterData.setTime(rs.getInt(3));
                 filterData.setCount(rs.getInt(4));
                 filterData.setSpeed(rs.getDouble(6));
-                filterData.setDay(rs.getInt(rs.getInt(7)));
+                filterData.setDay(rs.getInt(7));
                 filterData.setMonth(rs.getInt(8));
                 filterData.setYear(rs.getInt(9));
                 filterData.setMedianSpeed(rs.getInt(10));
                 filterData.setMaxSpeed(rs.getInt(11));
                 filterData.setMinSpeed(rs.getInt(12));
                 profileDayData.add(filterData);
-                System.out.println(filterData.toString());
+               // System.out.println(filterData.toString());
             
             }
             
@@ -190,12 +195,33 @@ public class GeoFilter extends Configured implements Tool {
         }    }
 
     private static void createProfileForCurrentDay(List<FilterData> profileDayData, long currentTimestamp, double speed, int count) {
-     
+          System.out.println("==============================");
         System.out.println("createProfileForCurrentDay");
         System.out.println(profileDayData.size());
-        System.out.println(currentTimestamp);
-        System.out.println(speed);
-        System.out.println(count);
+            for(FilterData pData :profileDayData){
+            System.out.println(pData.getYear());
+            if(count>10){
+           if(pData.getCount()<count){
+               System.out.println("smaller count");
+           }else{
+                      System.out.println("gratter or equal count");
+           }
+                          System.out.println(count);
+                   System.out.println(pData.getCount());
+            System.out.println("-------------------------------------");
+          if(pData.getSpeed()<speed){
+               System.out.println("smaller speed");
+           }else{
+                      System.out.println("gratter or equal speed");
+           }
+                 System.out.println(speed);
+                   System.out.println(pData.getSpeed());
+            }else {
+                System.out.println("small sample");
+            }
+              System.out.println("##########################################");
+        }
+   
     }
 
     @Override
@@ -368,7 +394,6 @@ public static Date getSameDayOfYearD(int year, int month, int day, int week) {
     cal.set(Calendar.MINUTE,0);
     cal.set(Calendar.SECOND,0);
     cal.set(Calendar.MILLISECOND,0);
-    System.out.println(cal.getTime());
     return cal.getTime();
 }
 }
