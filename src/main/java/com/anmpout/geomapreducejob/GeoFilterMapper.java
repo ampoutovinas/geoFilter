@@ -17,13 +17,14 @@ import org.apache.hadoop.mapreduce.Mapper;
  */
   public class GeoFilterMapper extends Mapper<GeoKey,
 GeoValue, GeoKeyMap, GeoValue> {
+      
 @Override
 protected void map(GeoKey key, GeoValue value, Mapper.Context
 context) throws IOException, InterruptedException {
     long bucket = 0;
     if(key.getLocation() != null){
 String location = key.getLocation().toString();
-            bucket =  value.getUnixTimestamp().get() - (value.getUnixTimestamp().get() % 3600);
+bucket =  value.getUnixTimestamp().get() - (value.getUnixTimestamp().get() % 3600);
 GeoKeyMap mapKey = new GeoKeyMap(key,new LongWritable(bucket));
 
 context.write(mapKey,value);

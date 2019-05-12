@@ -33,25 +33,20 @@ GeoValue, Text, Text> {
         
       
        for (GeoValue value : values) {
-           if(value.getSpeed().get()>0){
         speed = value.getSpeed().get() + speed;
         count = count+1;
         allSpeeds.add(value.getSpeed().get());
-           }
       }
+       
         Double max = max(allSpeeds);
         Double min = min(allSpeeds);
-        Double median = getMedian(allSpeeds);
-        
-        
+        Double median = getMedian(allSpeeds);       
+        speed= speed/count;
        
-       speed= speed/count;
        if(speed != 0){
-       time = (int) (keyMap.getKey().getDistance().get()/speed);
+       time = (int) (keyMap.getKey().getDistance().get()/convertSpeedFromKMHTOMS(speed));
        }
-//      double hours = time / 3600;
-//      double minutes = (time % 3600) / 60;
-//      double seconds = time % 60;
+
      long timestamp = keyMap.getTimeslot().get()*1000;
     Date d = new Date(timestamp);
     Calendar cal = Calendar.getInstance();
@@ -59,22 +54,19 @@ GeoValue, Text, Text> {
     int year = cal.get(Calendar.YEAR);
     int month = cal.get(Calendar.MONTH)+1;
     int day = cal.get(Calendar.DAY_OF_MONTH);
-        
-//timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
 
-     context.write(keyMap.getKey().getLocation(),new Text(String.valueOf(keyMap.getTimeslot())+"\t"+String.valueOf(count)+"\t"+
-             String.valueOf(speed)+"\t"+String.valueOf(time)+"\t"+String.valueOf(keyMap.getKey().getDistance().get())+"\t"+
+     context.write(keyMap.getKey().getLocation(),
+             new Text(String.valueOf(keyMap.getTimeslot())+"\t"+String.valueOf(count)+"\t"+
+             String.valueOf(speed)+"\t"+String.valueOf(time)+"\t"+
+             String.valueOf(keyMap.getKey().getDistance().get())+"\t"+
              String.valueOf(max)+"\t"+String.valueOf(min)+"\t"+String.valueOf(median)+"\t"+
              String.valueOf(day)+"\t"+String.valueOf(month)+"\t"+String.valueOf(year)));
-//      context.write(key.getLocation(), new Text());
-//       context.write(key.getLocation(), new Text()); 
-//       context.write(key.getLocation(), new Text()+"\n\n"));  
+
     }
     
-       public Double min(List<Double> array) {
+     public Double min(List<Double> array) {
      if(array.isEmpty()) return 0.0;
-      Double min = array.get(0);
-     
+      Double min = array.get(0);     
       for(int i=0; i<array.size(); i++) {
          if(array.get(i).compareTo(min)<0) {
             min = array.get(i);
@@ -91,8 +83,7 @@ GeoValue, Text, Text> {
 }
       public Double max(List<Double> array) {
       if(array.isEmpty()) return 0.0;
-      Double max = array.get(0);
-     
+      Double max = array.get(0);    
       for(int i=0; i<array.size(); i++) {
          if(array.get(i).compareTo(max)>0) {
             max = array.get(i);
@@ -100,4 +91,8 @@ GeoValue, Text, Text> {
       }
       return max;
    }
+
+    private double convertSpeedFromKMHTOMS(double speed) {
+        return (0.277778 * speed); 
+    } 
 }
