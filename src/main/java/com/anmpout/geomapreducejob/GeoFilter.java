@@ -45,9 +45,10 @@ public class GeoFilter extends Configured implements Tool {
 
     private static void saveItemToDBRealTime(String readLine, Connection conn) {
         try {
-            Calendar cal = Calendar.getInstance();
+            
             double speed = 0.0;
             int count = 0;
+            int time = 0;
             int pathId = 0;
             long currentTimestamp = 0L;
             List<FilterData> profileDayData = new ArrayList<>();
@@ -68,6 +69,10 @@ public class GeoFilter extends Configured implements Tool {
                 pathId = Integer.parseInt(parts[0]);
 
             }
+                //TIME         
+            if (!parts[4].equals("") && !parts[4].equals("NaN")) {
+               time =  Integer.parseInt(parts[4]);
+            }
             //TIMESTAMP
             if (!parts[1].equals("") && !parts[1].equals("NaN")) {
                 currentTimestamp = Long.parseLong(parts[1]);
@@ -75,22 +80,26 @@ public class GeoFilter extends Configured implements Tool {
 
             }
             if (pathId != 0) {
-
+                
+                
+                Calendar cal = Calendar.getInstance();  
                 int dayOfWeekInMonth = cal.get(Calendar.DAY_OF_WEEK_IN_MONTH);
                 int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
                 int year = cal.get(Calendar.YEAR);
                 int month = cal.get(Calendar.MONTH);
-                long previousYearTimestamp = getSameDayOfYearD(year - 1, month, dayOfWeek, dayOfWeekInMonth).getTime() / 1000;
-                long previous2YearTimestamp = getSameDayOfYearD(year - 2, month, dayOfWeek, dayOfWeekInMonth).getTime() / 1000;
+                long previousYearTimestamp = getSameDayOfYearD(year - 1, month,
+                        dayOfWeek, dayOfWeekInMonth).getTime() / 1000;
+                long previous2YearTimestamp = getSameDayOfYearD(year - 2, month,
+                        dayOfWeek, dayOfWeekInMonth).getTime() / 1000;
                 String queryProfileSameDay = " select * from FILTER_DATA T WHERE"
                         + " (T.TIMESTAMP = ? OR T.TIMESTAMP = ?)"
                         + " AND T.PATH_ID = ? ORDER BY T.TIMESTAMP ";
-                PreparedStatement preparedStmtpProfileDay = conn.prepareStatement(queryProfileSameDay);
-                preparedStmtpProfileDay.setLong(1, previousYearTimestamp);
-                preparedStmtpProfileDay.setLong(2, previous2YearTimestamp);
-                preparedStmtpProfileDay.setLong(3, pathId);
+                PreparedStatement pStmtpProfileDay = conn.prepareStatement(queryProfileSameDay);
+                pStmtpProfileDay.setLong(1, previousYearTimestamp);
+                pStmtpProfileDay.setLong(2, previous2YearTimestamp);
+                pStmtpProfileDay.setLong(3, pathId);
 
-                ResultSet rs = preparedStmtpProfileDay.executeQuery();
+                ResultSet rs = pStmtpProfileDay.executeQuery();
 
                 while (rs.next()) {
                     FilterData filterData = new FilterData();
@@ -106,7 +115,6 @@ public class GeoFilter extends Configured implements Tool {
                     filterData.setMaxSpeed(rs.getInt(11));
                     filterData.setMinSpeed(rs.getInt(12));
                     profileDayData.add(filterData);
-                    // System.out.println(filterData.toString());
 
                 }
 
@@ -182,7 +190,7 @@ public class GeoFilter extends Configured implements Tool {
             // execute the preparedstatement
             preparedStmt.execute();
             //create profile for current record
-            createProfileForCurrentDay(profileDayData, currentTimestamp, speed, count);
+            createProfileForCurrentDayTime(profileDayData, currentTimestamp, speed, count,time,conn);
 
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -190,15 +198,17 @@ public class GeoFilter extends Configured implements Tool {
         }
     }
 
-    private static void createProfileForCurrentDay(List<FilterData> profileDayData, long currentTimestamp, double speed, int count) {
+    private static void createProfileForCurrentDayTime(List<FilterData> profileDayData, long currentTimestamp, double speed, int count, int time, Connection conn) {
         System.out.println("==============================");
         System.out.println("createProfileForCurrentDay");
         System.out.println(profileDayData.size());
         for (FilterData pData : profileDayData) {
+             double difrenceCount  = 0.0;
+             double difrenceSpeed = 0.0;
+             double difrenceTime = 0.0;
             System.out.println(pData.getYear());
-            if (count > 10) {
-
-                double difrenceCount = (pData.getCount() - count) / count;
+            if (count > 1) {
+               difrenceCount = (pData.getCount() - count) / count;
                 System.out.println("count");
                 System.out.println(count);
                 System.out.println(pData.getCount());
@@ -207,20 +217,56 @@ public class GeoFilter extends Configured implements Tool {
 
                 System.out.println("-------------------------------------");
 
-                double difrenceSpeed = (pData.getSpeed() - speed) / speed;
+              difrenceSpeed  = (pData.getSpeed() - speed) / speed;
                 System.out.println("speed");
                 System.out.println(speed);
                 System.out.println(pData.getSpeed());
                 System.out.println(difrenceSpeed);
                 System.out.println(difrenceSpeed * 100);
+                
+               System.out.println("-------------------------------------");
+
+              difrenceTime  = (pData.getTime() - time) / time;
+                System.out.println("time");
+                System.out.println(time);
+                System.out.println(pData.getTime());
+                System.out.println(difrenceTime);
+                System.out.println(difrenceTime * 100);
+                
+              saveProfileDataToDB(pData,currentTimestamp,difrenceSpeed,difrenceCount,difrenceTime,conn);
 
             } else {
                 System.out.println("small sample");
             }
+            
+  
 
             System.out.println("##########################################");
         }
 
+    }
+
+    private static void saveProfileDataToDB(FilterData pData, long currentTimestamp,
+            double difSpeed, double difCount, double difTime, Connection conn) {
+               
+        String query = " insert into PROFILE_DATA (PATH_ID,CURRENT_TIMESTAMP ,OLD_TIMESTAMP, DIF_SPEED,"
+                    + " DIF_COUNT, DIF_TIME)"
+                    + " values (?, ?, ?, ?, ?,?)";
+        try{
+                    PreparedStatement preparedStmt = conn.prepareStatement(query);
+
+                preparedStmt.setInt(1, pData.getPathId());
+                preparedStmt.setLong(2, currentTimestamp);
+                preparedStmt.setLong(3, pData.getTimestamp());
+                preparedStmt.setDouble(4, difSpeed);
+                preparedStmt.setDouble(5, difCount);
+                preparedStmt.setDouble(6, difTime);
+                preparedStmt.execute();
+        }catch(Exception ex){
+        
+        }
+         
+    
     }
 
     @Override
@@ -248,6 +294,7 @@ public class GeoFilter extends Configured implements Tool {
         job.setOutputFormatClass(TextOutputFormat.class);
 
         if (job.waitForCompletion(true) && job.isSuccessful() && saveStats) {
+            
             Configuration hadoopConfig = new Configuration();
             hadoopConfig.set("fs.defaultFS", "hdfs://quickstart.cloudera:8020");
             hadoopConfig.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
@@ -354,14 +401,16 @@ public class GeoFilter extends Configured implements Tool {
 
     }
 
-    public static void openFileFromHDFS(FileSystem fs, Path path, boolean realTime) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
+    public static void openFileFromHDFS(FileSystem fs, Path path, boolean realTime) throws IOException,
+            ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
+        
         InputStream is = fs.open(path);
-        Class.forName("com.mysql.jdbc.Driver").newInstance();
-        Connection conn = DriverManager.getConnection(
-                "jdbc:mysql://geofilterdb.c4nkehdtywwc.us-east-2.rds.amazonaws.com:3306/geofilterdb", "cloudera", "cloudera");
-
         String readLine;
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                Class.forName("com.mysql.jdbc.Driver").newInstance();
+        Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://geofilterdb.c4nkehdtywwc.us-east-2.rds.amazonaws.com:3306/geofilterdb",
+                "cloudera", "cloudera");
         if (realTime) {
             while (((readLine = br.readLine()) != null)) {
                 saveItemToDBRealTime(readLine, conn);

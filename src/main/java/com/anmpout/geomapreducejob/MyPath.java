@@ -171,7 +171,7 @@ public class MyPath {
         return "MyPath{" + "pathId=" + pathId + ", pathName=" + pathName + ", pathOrignDeviceId=" + pathOrignDeviceId + ", pathDestinationDeviceId=" + pathDestinationDeviceId + ", polyline=" + polyline + '}';
     }
     
-    
+  
         private static Double calculateDistance(BufferedLineString polyline) {
            double returnDistance=0;
        
